@@ -1,12 +1,10 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
+import Header from '@/components/Header';
+import CatalogTab from '@/components/CatalogTab';
+import OrdersTab from '@/components/OrdersTab';
+import ProfileTab from '@/components/ProfileTab';
 
 interface Product {
   id: number;
@@ -198,155 +196,20 @@ const Index = () => {
     );
   };
 
-  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex gap-0.5">
-        {[1, 2, 3, 4, 5].map(star => (
-          <Icon
-            key={star}
-            name="Star"
-            size={14}
-            className={star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  const getStatusBadge = (status: Order['status']) => {
-    const variants = {
-      delivered: { label: 'Доставлен', variant: 'default' as const },
-      shipping: { label: 'В пути', variant: 'secondary' as const },
-      processing: { label: 'Обработка', variant: 'outline' as const }
-    };
-    return variants[status];
-  };
-
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 bg-primary text-primary-foreground shadow-lg">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Icon name="Store" size={32} className="text-secondary" />
-              <h1 className="text-2xl font-bold">OZON</h1>
-            </div>
-            
-            <div className="flex-1 max-w-2xl">
-              <div className="relative">
-                <Input
-                  placeholder="Искать товары..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 pr-10"
-                />
-                <Icon name="Search" size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60" />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative hover:bg-white/10">
-                    <Icon name="ShoppingCart" size={24} />
-                    {cartCount > 0 && (
-                      <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-secondary text-xs">
-                        {cartCount}
-                      </Badge>
-                    )}
-                  </Button>
-                </SheetTrigger>
-                <SheetContent className="w-full sm:max-w-lg">
-                  <SheetHeader>
-                    <SheetTitle className="flex items-center gap-2">
-                      <Icon name="ShoppingCart" size={24} />
-                      Корзина
-                    </SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-6 space-y-4">
-                    {cart.length === 0 ? (
-                      <div className="text-center py-12">
-                        <Icon name="ShoppingBag" size={64} className="mx-auto text-muted-foreground mb-4" />
-                        <p className="text-muted-foreground">Корзина пуста</p>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="space-y-4 max-h-[60vh] overflow-y-auto">
-                          {cart.map(item => (
-                            <Card key={item.id} className="overflow-hidden">
-                              <CardContent className="p-4">
-                                <div className="flex gap-4">
-                                  <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded" />
-                                  <div className="flex-1">
-                                    <h4 className="font-medium text-sm mb-2">{item.name}</h4>
-                                    <p className="text-lg font-bold text-primary">{item.price.toLocaleString('ru-RU')} ₽</p>
-                                    <div className="flex items-center gap-2 mt-2">
-                                      <Button
-                                        size="icon"
-                                        variant="outline"
-                                        className="h-7 w-7"
-                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                      >
-                                        <Icon name="Minus" size={14} />
-                                      </Button>
-                                      <span className="w-8 text-center">{item.quantity}</span>
-                                      <Button
-                                        size="icon"
-                                        variant="outline"
-                                        className="h-7 w-7"
-                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                      >
-                                        <Icon name="Plus" size={14} />
-                                      </Button>
-                                      <Button
-                                        size="icon"
-                                        variant="ghost"
-                                        className="h-7 w-7 ml-auto"
-                                        onClick={() => removeFromCart(item.id)}
-                                      >
-                                        <Icon name="Trash2" size={14} />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                        <div className="border-t pt-4 space-y-4">
-                          <div className="flex justify-between text-lg font-bold">
-                            <span>Итого:</span>
-                            <span className="text-primary">{cartTotal.toLocaleString('ru-RU')} ₽</span>
-                          </div>
-                          <Button className="w-full" size="lg">
-                            Оформить заказ
-                          </Button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </SheetContent>
-              </Sheet>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hover:bg-white/10"
-                onClick={() => setActiveTab('profile')}
-              >
-                <Icon name="User" size={24} />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        cart={cart}
+        updateQuantity={updateQuantity}
+        removeFromCart={removeFromCart}
+        setActiveTab={setActiveTab}
+      />
 
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -365,202 +228,20 @@ const Index = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="catalog" className="space-y-8">
-            <div>
-              <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
-                <Icon name="Sparkles" size={32} className="text-primary" />
-                Популярные товары
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProducts.map(product => (
-                  <Card
-                    key={product.id}
-                    className="group overflow-hidden hover:shadow-xl transition-all duration-300 animate-fade-in cursor-pointer"
-                  >
-                    <CardContent className="p-0">
-                      <div className="relative overflow-hidden">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
-                        />
-                        {product.discount && (
-                          <Badge className="absolute top-3 left-3 bg-secondary text-white">
-                            -{product.discount}%
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="p-4 space-y-3">
-                        <h3 className="font-semibold text-lg line-clamp-2 min-h-[3.5rem]">{product.name}</h3>
-                        
-                        <div className="flex items-center gap-2">
-                          {renderStars(product.rating)}
-                          <span className="text-sm text-muted-foreground">
-                            {product.rating} ({product.reviews})
-                          </span>
-                        </div>
-
-                        <div className="space-y-1">
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-2xl font-bold text-primary">
-                              {product.price.toLocaleString('ru-RU')} ₽
-                            </span>
-                            {product.oldPrice && (
-                              <span className="text-sm text-muted-foreground line-through">
-                                {product.oldPrice.toLocaleString('ru-RU')} ₽
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <Button
-                          className="w-full group-hover:scale-105 transition-transform"
-                          onClick={() => addToCart(product)}
-                        >
-                          <Icon name="ShoppingCart" size={18} className="mr-2" />
-                          В корзину
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
-                <Icon name="MessageSquare" size={32} className="text-accent" />
-                Отзывы покупателей
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {reviews.map(review => (
-                  <Card key={review.id} className="animate-fade-in">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <Avatar>
-                          <AvatarFallback className="bg-primary text-primary-foreground">
-                            {review.avatar}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-semibold">{review.author}</h4>
-                            <span className="text-sm text-muted-foreground">{review.date}</span>
-                          </div>
-                          {renderStars(review.rating)}
-                          <p className="text-muted-foreground">{review.text}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+          <TabsContent value="catalog">
+            <CatalogTab
+              filteredProducts={filteredProducts}
+              reviews={reviews}
+              addToCart={addToCart}
+            />
           </TabsContent>
 
           <TabsContent value="orders">
-            <div>
-              <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
-                <Icon name="Package" size={32} className="text-primary" />
-                Мои заказы
-              </h2>
-              <div className="space-y-4">
-                {orders.map(order => (
-                  <Card key={order.id} className="animate-fade-in hover:shadow-lg transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-3">
-                            <h3 className="text-xl font-bold">{order.id}</h3>
-                            <Badge {...getStatusBadge(order.status)}>
-                              {getStatusBadge(order.status).label}
-                            </Badge>
-                          </div>
-                          <p className="text-muted-foreground">
-                            {order.date} • {order.items} {order.items === 1 ? 'товар' : 'товара'}
-                          </p>
-                          <p className="text-2xl font-bold text-primary">
-                            {order.total.toLocaleString('ru-RU')} ₽
-                          </p>
-                        </div>
-                        <Button variant="outline">
-                          Подробнее
-                          <Icon name="ChevronRight" size={18} className="ml-2" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+            <OrdersTab orders={orders} />
           </TabsContent>
 
           <TabsContent value="profile">
-            <div className="max-w-2xl mx-auto">
-              <Card className="animate-fade-in">
-                <CardContent className="p-8">
-                  <div className="flex items-start gap-6">
-                    <Avatar className="h-24 w-24">
-                      <AvatarFallback className="bg-primary text-primary-foreground text-3xl">
-                        ИП
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 space-y-4">
-                      <div>
-                        <h2 className="text-2xl font-bold mb-1">Иван Петров</h2>
-                        <p className="text-muted-foreground">ivan.petrov@example.com</p>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3 text-muted-foreground">
-                          <Icon name="Phone" size={20} />
-                          <span>+7 (999) 123-45-67</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-muted-foreground">
-                          <Icon name="MapPin" size={20} />
-                          <span>Москва, ул. Примерная, д. 123</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-muted-foreground">
-                          <Icon name="CreditCard" size={20} />
-                          <span>Бонусов: 1,250 баллов</span>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-3 pt-4">
-                        <Button>
-                          <Icon name="Settings" size={18} className="mr-2" />
-                          Настройки
-                        </Button>
-                        <Button variant="outline">
-                          <Icon name="LogOut" size={18} className="mr-2" />
-                          Выйти
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="mt-6 animate-fade-in">
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <Icon name="Heart" size={24} className="text-red-500" />
-                    Избранное
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    {products.slice(0, 4).map(product => (
-                      <div key={product.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-accent/5 transition-colors cursor-pointer">
-                        <img src={product.image} alt={product.name} className="w-16 h-16 object-cover rounded" />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{product.name}</p>
-                          <p className="text-primary font-bold">{product.price.toLocaleString('ru-RU')} ₽</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <ProfileTab products={products} />
           </TabsContent>
         </Tabs>
       </main>
